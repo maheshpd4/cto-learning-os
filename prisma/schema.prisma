@@ -1,0 +1,299 @@
+// ============================================================
+// CTO Learning OS — Prisma Schema
+// Database: PostgreSQL
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum SkillArea {
+  AI_SYSTEMS
+  DATA_PLATFORMS
+  CLOUD_ARCHITECTURE
+  ENTERPRISE_INTEGRATION
+  PLATFORM_ENGINEERING
+  SECURITY
+  PRODUCT_FINANCE_LEADERSHIP
+}
+
+enum PhaseStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+enum TaskType {
+  STUDY
+  BUILD
+  PRACTICE
+  REVIEW
+  PROJECT
+}
+
+enum MaterialType {
+  COURSE
+  YOUTUBE
+  PDF
+  NOTE
+  GITHUB_REPO
+  ARCHITECTURE_DIAGRAM
+  INTERVIEW_QUESTION
+  ARTICLE
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ARCHITECT
+}
+
+enum MaterialStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  BOOKMARKED
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  REVIEW
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ============================================================
+// ROADMAP MODELS
+// ============================================================
+
+model Phase {
+  id          String      @id @default(cuid())
+  number      Int         @unique
+  title       String
+  description String
+  focus       String      // key focus area
+  startDate   DateTime
+  endDate     DateTime
+  status      PhaseStatus @default(UPCOMING)
+  deliverable String      // project deliverable for this phase
+  weeks       Week[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("phases")
+}
+
+model Week {
+  id          String      @id @default(cuid())
+  phaseId     String
+  phase       Phase       @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  weekNumber  Int         // global week number (1-24)
+  title       String
+  goals       String[]    // array of goal strings
+  expectedOutput String
+  startDate   DateTime
+  endDate     DateTime
+  tasks       DailyTask[]
+  createdAt   DateTime    @default(now())
+
+  @@unique([phaseId, weekNumber])
+  @@map("weeks")
+}
+
+model DailyTask {
+  id          String     @id @default(cuid())
+  weekId      String
+  week        Week       @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  skillArea   SkillArea
+  type        TaskType   @default(STUDY)
+  status      TaskStatus @default(PENDING)
+  dueDate     DateTime
+  completedAt DateTime?
+  timeBlocks  Int        @default(2) // number of 30-min blocks
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("daily_tasks")
+}
+
+// ============================================================
+// PROGRESS TRACKING
+// ============================================================
+
+model CheckIn {
+  id              String   @id @default(cuid())
+  date            DateTime @default(now())
+  studiedTopics   String   // free text — what was studied
+  builtThings     String   // what was built/created
+  unclearConcepts String   // what is still unclear
+  codeWritten     String?  // code paste (optional)
+  blockers        String?  // blockers faced
+  confidenceScore Int      // 1-10 self-rating
+  // AI-generated fields (populated after submission)
+  aiSummary       String?  // progress summary from AI
+  aiCorrections   String?  // concept corrections from AI
+  nextDayPlan     String?  // tomorrow's AI-suggested plan
+  suggestedPractice String? // practice recommendations
+  interviewQuestions String? // JSON array of 3-5 interview Qs
+  weakAreasDetected  String[] // skill areas needing attention
+  createdAt       DateTime @default(now())
+
+  @@map("check_ins")
+}
+
+model SkillScore {
+  id        String    @id @default(cuid())
+  area      SkillArea
+  score     Float     // 0-100
+  date      DateTime  @default(now())
+  notes     String?   // what changed
+
+  @@map("skill_scores")
+}
+
+model DailyStreak {
+  id         String   @id @default(cuid())
+  date       DateTime @unique @default(now())
+  completed  Boolean  @default(false)
+  tasksTotal Int      @default(0)
+  tasksDone  Int      @default(0)
+
+  @@map("daily_streaks")
+}
+
+// ============================================================
+// AI COACH
+// ============================================================
+
+model CoachSession {
+  id        String         @id @default(cuid())
+  title     String         @default("Chat Session")
+  createdAt DateTime       @default(now())
+  messages  CoachMessage[]
+
+  @@map("coach_sessions")
+}
+
+model CoachMessage {
+  id        String       @id @default(cuid())
+  sessionId String
+  session   CoachSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      MessageRole
+  content   String       @db.Text
+  createdAt DateTime     @default(now())
+
+  @@map("coach_messages")
+}
+
+// ============================================================
+// MATERIALS HUB
+// ============================================================
+
+model Material {
+  id         String         @id @default(cuid())
+  title      String
+  url        String?
+  type       MaterialType
+  notes      String?        @db.Text
+  skillArea  SkillArea
+  phase      Int?           // which phase (1-6)
+  week       Int?           // which week
+  difficulty Difficulty     @default(INTERMEDIATE)
+  status     MaterialStatus @default(NOT_STARTED)
+  tags       String[]       // free-form tags
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@map("materials")
+}
+
+// ============================================================
+// PROJECT PORTFOLIO
+// ============================================================
+
+model Project {
+  id                  String        @id @default(cuid())
+  title               String
+  description         String        @db.Text
+  githubUrl           String?
+  architectureNotes   String?       @db.Text
+  status              ProjectStatus @default(PLANNING)
+  completionPct       Float         @default(0)
+  demoReady           Boolean       @default(false)
+  resumeBullet        String?       @db.Text // AI-generated
+  skillAreas          SkillArea[]
+  tasks               ProjectTask[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@map("projects")
+}
+
+model ProjectTask {
+  id          String     @id @default(cuid())
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String?    @db.Text
+  sprint      Int?       // sprint number
+  status      TaskStatus @default(PENDING)
+  priority    Priority   @default(MEDIUM)
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+
+  @@map("project_tasks")
+}
+
+// ============================================================
+// CODING PRACTICE ENGINE
+// ============================================================
+
+model PracticeExercise {
+  id               String    @id @default(cuid())
+  concept          String
+  skillArea        SkillArea
+  beginnerTask     String    @db.Text
+  intermediateTask String    @db.Text
+  architectTask    String    @db.Text
+  sampleCode       String?   @db.Text
+  expectedOutput   String?   @db.Text
+  codeReview       String?   @db.Text
+  optimizedVersion String?   @db.Text
+  interviewQ       String?   @db.Text
+  createdAt        DateTime  @default(now())
+
+  @@map("practice_exercises")
+}
