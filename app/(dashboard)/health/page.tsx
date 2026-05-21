@@ -407,8 +407,8 @@ export default function HealthPage() {
                 ].map(({ label, key, unit, target }) => {
                   const latest = biomarkers[biomarkers.length - 1];
                   const baseline = biomarkers[0];
-                  const val = (latest as Record<string, number | null>)[key];
-                  const base = (baseline as Record<string, number | null>)[key];
+                  const val = (latest as unknown as Record<string, number | null>)[key];
+                  const base = (baseline as unknown as Record<string, number | null>)[key];
                   return (
                     <div key={key} className="bg-slate-800/60 rounded-lg p-3">
                       <p className="text-xs text-slate-500 mb-0.5">{label}</p>
