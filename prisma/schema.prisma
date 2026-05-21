@@ -278,6 +278,80 @@ model ProjectTask {
 }
 
 // ============================================================
+// HEALTH TRACKING
+// ============================================================
+
+model HealthLog {
+  id           String   @id @default(cuid())
+  date         DateTime @unique
+  weightKg     Float?   // morning weight in kg
+  steps        Int?     // total steps
+  cardioMin    Int?     // cardio minutes
+  strengthMin  Int?     // strength training minutes
+  proteinG     Float?   // protein intake in grams
+  waterL       Float?   // water intake in litres
+  sleepHrs     Float?   // sleep hours
+  energyScore  Int?     // 1-10 energy level
+  foodScore    Int?     // 1-10 food quality score
+  notes        String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("health_logs")
+}
+
+model Biomarker {
+  id               String   @id @default(cuid())
+  date             DateTime
+  totalCholesterol Float?   // mg/dL
+  ldl              Float?   // mg/dL
+  hdl              Float?   // mg/dL
+  triglycerides    Float?   // mg/dL
+  cholHdlRatio     Float?
+  vitaminD         Float?   // ng/mL
+  vitaminB12       Float?   // pg/mL
+  fastingGlucose   Float?   // mg/dL (optional extra)
+  waistInch        Float?   // waist circumference in inches
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now())
+
+  @@map("biomarkers")
+}
+
+model HealthWeekTarget {
+  id           String   @id @default(cuid())
+  weekNumber   Int      @unique // 1-24
+  startDate    DateTime
+  endDate      DateTime
+  targetWeight Float    // kg target for end of this week
+
+  @@map("health_week_targets")
+}
+
+model HealthMilestone {
+  id               String   @id @default(cuid())
+  number           Int      @unique // 1, 2, 3
+  title            String
+  targetDate       DateTime
+  targetWeightMin  Float    // kg lower bound
+  targetWeightMax  Float    // kg upper bound
+  targetTotalChol  Float?   // mg/dL target max
+  targetLdl        Float?   // mg/dL target max
+  targetHdl        Float?   // mg/dL target min
+  targetTriglyc    Float?   // mg/dL target max
+  targetVitaminD   Float?   // ng/mL target min
+  targetVitaminB12 Float?   // pg/mL target min
+  targetWaistMin   Float?   // inches lower bound
+  targetWaistMax   Float?   // inches upper bound
+  achieved         Boolean  @default(false)
+  achievedAt       DateTime?
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now())
+
+  @@map("health_milestones")
+}
+
+// ============================================================
 // CODING PRACTICE ENGINE
 // ============================================================
 

@@ -13,6 +13,7 @@ import {
   Rocket,
   ChevronLeft,
   ChevronRight,
+  HeartPulse,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/practice",   label: "Practice",     icon: Code2,           description: "Coding challenges" },
   { href: "/materials",  label: "Materials",    icon: Library,         description: "Learning resources" },
   { href: "/projects",   label: "Projects",     icon: FolderKanban,    description: "Portfolio tracker" },
+  { href: "/health",     label: "Health",       icon: HeartPulse,      description: "92kg → 75kg journey" },
 ];
 
 export function Sidebar() {

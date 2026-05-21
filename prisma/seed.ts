@@ -1,5 +1,86 @@
 import { PrismaClient, SkillArea, PhaseStatus, TaskType } from "@prisma/client";
 
+// ============================================================
+// HEALTH DATA
+// Health journey: 92kg → 75kg, May 24 – Nov 4, 2026 (24 weeks)
+// ============================================================
+const HEALTH_START = new Date("2026-05-24"); // Saturday Week 1 start
+
+const healthWeekTargets = [
+  { weekNumber: 1,  targetWeight: 92.0 },
+  { weekNumber: 2,  targetWeight: 91.3 },
+  { weekNumber: 3,  targetWeight: 90.5 },
+  { weekNumber: 4,  targetWeight: 89.8 },
+  { weekNumber: 5,  targetWeight: 89.0 },
+  { weekNumber: 6,  targetWeight: 88.3 },
+  { weekNumber: 7,  targetWeight: 87.6 },
+  { weekNumber: 8,  targetWeight: 86.8 },
+  { weekNumber: 9,  targetWeight: 86.1 },
+  { weekNumber: 10, targetWeight: 85.3 },
+  { weekNumber: 11, targetWeight: 84.6 },
+  { weekNumber: 12, targetWeight: 83.9 },
+  { weekNumber: 13, targetWeight: 83.1 },
+  { weekNumber: 14, targetWeight: 82.4 },
+  { weekNumber: 15, targetWeight: 81.7 },
+  { weekNumber: 16, targetWeight: 80.9 },
+  { weekNumber: 17, targetWeight: 80.2 },
+  { weekNumber: 18, targetWeight: 79.4 },
+  { weekNumber: 19, targetWeight: 78.7 },
+  { weekNumber: 20, targetWeight: 78.0 },
+  { weekNumber: 21, targetWeight: 77.2 },
+  { weekNumber: 22, targetWeight: 76.5 },
+  { weekNumber: 23, targetWeight: 75.7 },
+  { weekNumber: 24, targetWeight: 75.0 },
+];
+
+const healthMilestones = [
+  {
+    number: 1,
+    title: "Milestone 1 — First Blood Test",
+    targetDate: new Date("2026-07-25"),
+    targetWeightMin: 85.0,
+    targetWeightMax: 86.0,
+    targetTotalChol: 230,
+    targetLdl: 145,
+    targetHdl: null,
+    targetTriglyc: null,
+    targetVitaminD: 28,
+    targetVitaminB12: 400,
+    targetWaistMin: 38.5,
+    targetWaistMax: 39.0,
+  },
+  {
+    number: 2,
+    title: "Milestone 2 — Mid-Point Check",
+    targetDate: new Date("2026-09-25"),
+    targetWeightMin: 79.0,
+    targetWeightMax: 81.0,
+    targetTotalChol: 200,
+    targetLdl: 115,
+    targetHdl: null,
+    targetTriglyc: null,
+    targetVitaminD: 35,
+    targetVitaminB12: 500,
+    targetWaistMin: 36.0,
+    targetWaistMax: 37.0,
+  },
+  {
+    number: 3,
+    title: "Milestone 3 — Final Target (Nov 4)",
+    targetDate: new Date("2026-11-04"),
+    targetWeightMin: 75.0,
+    targetWeightMax: 75.0,
+    targetTotalChol: 180,
+    targetLdl: 95,
+    targetHdl: 55,
+    targetTriglyc: 100,
+    targetVitaminD: 45,
+    targetVitaminB12: 550,
+    targetWaistMin: 34.0,
+    targetWaistMax: 35.0,
+  },
+];
+
 const prisma = new PrismaClient();
 
 // ============================================================
@@ -445,6 +526,10 @@ async function main() {
   await prisma.skillScore.deleteMany();
   await prisma.coachMessage.deleteMany();
   await prisma.coachSession.deleteMany();
+  await prisma.healthLog.deleteMany();
+  await prisma.biomarker.deleteMany();
+  await prisma.healthWeekTarget.deleteMany();
+  await prisma.healthMilestone.deleteMany();
 
   console.log("🗑️  Cleared existing data");
 
@@ -535,6 +620,44 @@ async function main() {
       tasksDone: 0,
     },
   });
+
+  // ── Health: baseline biomarker (May 24 2026 blood test)
+  await prisma.biomarker.create({
+    data: {
+      date: new Date("2026-05-24"),
+      totalCholesterol: 264,
+      ldl: 183,
+      hdl: 56,
+      triglycerides: 126,
+      cholHdlRatio: 4.71,
+      vitaminD: 17.29,
+      vitaminB12: 294,
+      waistInch: 41,
+      notes: "Baseline — start of 165-day health transformation",
+    },
+  });
+  console.log("  🩸 Baseline biomarker created");
+
+  // ── Health: 24-week weight targets
+  for (const wt of healthWeekTargets) {
+    const start = addDays(HEALTH_START, (wt.weekNumber - 1) * 7);
+    const end   = addDays(start, 6);
+    await prisma.healthWeekTarget.create({
+      data: {
+        weekNumber:   wt.weekNumber,
+        startDate:    start,
+        endDate:      end,
+        targetWeight: wt.targetWeight,
+      },
+    });
+  }
+  console.log("  📉 24-week weight targets created");
+
+  // ── Health: milestones
+  for (const m of healthMilestones) {
+    await prisma.healthMilestone.create({ data: m });
+  }
+  console.log("  🎯 3 health milestones created");
 
   console.log("\n✨ Seed complete! CTO Learning OS is ready.");
   console.log("   Run: npm run dev to start the application");
