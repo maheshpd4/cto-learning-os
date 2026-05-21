@@ -293,8 +293,8 @@ export default function HealthPage() {
                 <Tooltip
                   contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 8 }}
                   labelStyle={{ color: "#94a3b8" }}
-                  formatter={(val: number | null, name: string) =>
-                    val != null ? [`${val} kg`, name === "target" ? "Target" : "Actual"] : ["—", name]
+                  formatter={(val, name) =>
+                    val != null ? [`${val} kg`, name === "target" ? "Target" : "Actual"] : ["—", String(name)]
                   }
                 />
                 <Line
