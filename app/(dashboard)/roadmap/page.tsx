@@ -1,6 +1,5 @@
-export const dynamic = "force-dynamic";
-
 "use client";
+export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, CheckCircle2, Clock, Loader2,
