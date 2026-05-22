@@ -1,11 +1,8 @@
-export const dynamic = "force-dynamic";
-
 "use client";
-
+export const dynamic = "force-dynamic";
 import { useState } from "react";
 import { Code2, Loader2, Sparkles, ChevronDown, ChevronRight, Zap } from "lucide-react";
 import { cn, SKILL_LABELS } from "@/lib/utils";
-
 interface Exercise {
   concept: string;
   beginnerTask: string;
@@ -19,7 +16,6 @@ interface Exercise {
   interviewQuestion: string;
   interviewAnswer: string;
 }
-
 const EXAMPLE_CONCEPTS = [
   "Kafka retry and dead letter queue",
   "RAG pipeline with pgvector",
@@ -30,14 +26,12 @@ const EXAMPLE_CONCEPTS = [
   "Event sourcing with CQRS",
   "Zero-trust service-to-service auth",
 ];
-
 export default function PracticePage() {
   const [concept, setConcept] = useState("");
   const [skillArea, setSkillArea] = useState("ENTERPRISE_INTEGRATION");
   const [loading, setLoading] = useState(false);
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [expandedLevel, setExpandedLevel] = useState<string | null>("beginner");
-
   const generate = async () => {
     if (!concept.trim()) return;
     setLoading(true);
@@ -55,13 +49,11 @@ export default function PracticePage() {
       setLoading(false);
     }
   };
-
   const LEVELS = [
     { key: "beginner", label: "🌱 Beginner", color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10", task: exercise?.beginnerTask, hints: exercise?.beginnerHints },
     { key: "intermediate", label: "⚡ Intermediate", color: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10", task: exercise?.intermediateTask, hints: exercise?.intermediateHints },
     { key: "architect", label: "🏛️ Architect Level", color: "text-violet-400 border-violet-500/30 bg-violet-500/10", task: exercise?.architectTask, hints: [] },
   ];
-
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
@@ -69,7 +61,6 @@ export default function PracticePage() {
         <h1 className="text-2xl font-bold text-foreground">Coding Practice Engine</h1>
         <p className="text-muted-foreground text-sm mt-1">AI-generated exercises at 3 levels for any concept</p>
       </div>
-
       {/* Input */}
       <div className="card-cto space-y-4">
         <div>
@@ -82,7 +73,6 @@ export default function PracticePage() {
             className="w-full bg-muted/30 border border-border rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
-
         {/* Example concepts */}
         <div className="flex flex-wrap gap-1.5">
           {EXAMPLE_CONCEPTS.map((c) => (
@@ -92,7 +82,6 @@ export default function PracticePage() {
             </button>
           ))}
         </div>
-
         <div className="flex gap-3">
           <select value={skillArea} onChange={(e) => setSkillArea(e.target.value)}
             className="flex-1 bg-muted/30 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary">
@@ -108,7 +97,6 @@ export default function PracticePage() {
           </button>
         </div>
       </div>
-
       {/* Results */}
       {exercise && (
         <div className="space-y-4 animate-slide-up">
@@ -145,7 +133,6 @@ export default function PracticePage() {
               )}
             </div>
           ))}
-
           {/* Sample code */}
           {exercise.sampleCode && (
             <div className="card-cto">
@@ -161,7 +148,6 @@ export default function PracticePage() {
               )}
             </div>
           )}
-
           {/* Real-world scenario */}
           {exercise.realWorldScenario && (
             <div className="card-cto border-cyan-500/20">
@@ -169,7 +155,6 @@ export default function PracticePage() {
               <p className="text-sm text-foreground/80">{exercise.realWorldScenario}</p>
             </div>
           )}
-
           {/* Interview Q&A */}
           {exercise.interviewQuestion && (
             <div className="card-cto border-violet-500/20 space-y-3">

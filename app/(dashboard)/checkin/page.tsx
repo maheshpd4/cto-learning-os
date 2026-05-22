@@ -1,11 +1,8 @@
-export const dynamic = "force-dynamic";
-
 "use client";
-
+export const dynamic = "force-dynamic";
 import { useState } from "react";
 import { CheckCircle2, ChevronRight, ChevronLeft, Loader2, Sparkles, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 interface CheckInResult {
   summary: string;
   corrections: string;
@@ -16,7 +13,6 @@ interface CheckInResult {
   interviewQuestions: string[];
   coachNote: string;
 }
-
 const STEPS = [
   { id: 1, label: "Study", question: "What did you study today?", placeholder: "e.g., Studied Kafka consumer groups and partition assignment strategies. Read about ISR and leader election..." },
   { id: 2, label: "Build", question: "What did you build or create?", placeholder: "e.g., Built a Kafka producer in Python with retry logic. Set up a 3-broker cluster with Docker Compose..." },
@@ -25,7 +21,6 @@ const STEPS = [
   { id: 5, label: "Blockers", question: "What blockers did you face?", placeholder: "e.g., Couldn't get Kafka to start due to KRaft mode configuration. Spent 2h debugging port conflicts...", optional: true },
   { id: 6, label: "Confidence", question: "Rate your confidence today (1-10)", isSlider: true },
 ];
-
 export default function CheckInPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({
@@ -39,11 +34,9 @@ export default function CheckInPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [submitted, setSubmitted] = useState(false);
-
   const keys = ["studiedTopics", "builtThings", "unclearConcepts", "codeWritten", "blockers"] as const;
   const currentStep = STEPS[step];
   const isLastStep = step === STEPS.length - 1;
-
   const updateAnswer = (value: string | number) => {
     if (step < STEPS.length - 1) {
       setAnswers((prev) => ({ ...prev, [keys[step]]: value as string }));
@@ -51,12 +44,10 @@ export default function CheckInPage() {
       setAnswers((prev) => ({ ...prev, confidenceScore: value as number }));
     }
   };
-
   const getCurrentValue = () => {
     if (step < STEPS.length - 1) return answers[keys[step]];
     return answers.confidenceScore;
   };
-
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -90,14 +81,12 @@ export default function CheckInPage() {
       setLoading(false);
     }
   };
-
   const confidenceColor = (score: number) => {
     if (score >= 8) return "text-emerald-400";
     if (score >= 6) return "text-cyan-400";
     if (score >= 4) return "text-amber-400";
     return "text-red-400";
   };
-
   const confidenceLabel = (score: number) => {
     if (score >= 9) return "Crushing it! 🚀";
     if (score >= 7) return "Strong day 💪";
@@ -105,7 +94,6 @@ export default function CheckInPage() {
     if (score >= 3) return "Tough day, keep going 🔥";
     return "We'll rebuild tomorrow 🛠️";
   };
-
   // Submitted — show AI result
   if (submitted && result) {
     return (
@@ -117,7 +105,6 @@ export default function CheckInPage() {
           <h1 className="text-xl font-bold text-foreground">Check-in Complete!</h1>
           <p className="text-muted-foreground text-sm mt-1">Here's your AI coach's analysis</p>
         </div>
-
         {/* Summary */}
         <div className="card-cto border-primary/20">
           <div className="flex items-center gap-2 mb-3">
@@ -126,7 +113,6 @@ export default function CheckInPage() {
           </div>
           <p className="text-sm text-foreground/90 leading-relaxed">{result.summary}</p>
         </div>
-
         {/* Strengths & Weak Areas */}
         <div className="grid grid-cols-2 gap-4">
           {result.strengths?.length > 0 && (
@@ -150,7 +136,6 @@ export default function CheckInPage() {
             </div>
           )}
         </div>
-
         {/* Corrections */}
         {result.corrections && result.corrections !== "Concepts look solid." && (
           <div className="card-cto border-amber-500/20">
@@ -158,7 +143,6 @@ export default function CheckInPage() {
             <p className="text-sm text-foreground/80">{result.corrections}</p>
           </div>
         )}
-
         {/* Tomorrow's Plan */}
         {result.nextDayPlan?.length > 0 && (
           <div className="card-cto border-cyan-500/20">
@@ -175,7 +159,6 @@ export default function CheckInPage() {
             </ol>
           </div>
         )}
-
         {/* Suggested Practice */}
         {result.suggestedPractice && (
           <div className="card-cto border-violet-500/20">
@@ -183,7 +166,6 @@ export default function CheckInPage() {
             <p className="text-sm text-foreground/80">{result.suggestedPractice}</p>
           </div>
         )}
-
         {/* Interview Questions */}
         {result.interviewQuestions?.length > 0 && (
           <div className="card-cto">
@@ -200,7 +182,6 @@ export default function CheckInPage() {
             </ol>
           </div>
         )}
-
         {/* Coach note */}
         {result.coachNote && (
           <div className="card-cto border-primary/20 bg-primary/5">
@@ -208,7 +189,6 @@ export default function CheckInPage() {
             <p className="text-sm text-foreground/90 italic">"{result.coachNote}"</p>
           </div>
         )}
-
         <button
           onClick={() => { setSubmitted(false); setResult(null); setStep(0); setAnswers({ studiedTopics: "", builtThings: "", unclearConcepts: "", codeWritten: "", blockers: "", confidenceScore: 7 }); }}
           className="w-full py-2.5 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
@@ -218,7 +198,6 @@ export default function CheckInPage() {
       </div>
     );
   }
-
   return (
     <div className="max-w-xl mx-auto animate-fade-in">
       {/* Header */}
@@ -228,7 +207,6 @@ export default function CheckInPage() {
           End-of-day reflection · {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
         </p>
       </div>
-
       {/* Progress bar */}
       <div className="mb-6">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
@@ -241,7 +219,6 @@ export default function CheckInPage() {
             style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
           />
         </div>
-
         {/* Step indicators */}
         <div className="flex items-center gap-1 mt-3">
           {STEPS.map((s, i) => (
@@ -258,11 +235,9 @@ export default function CheckInPage() {
           ))}
         </div>
       </div>
-
       {/* Question card */}
       <div className="card-cto border-primary/20 mb-6">
         <p className="text-base font-semibold text-foreground mb-4">{currentStep.question}</p>
-
         {currentStep.isSlider ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -301,12 +276,10 @@ export default function CheckInPage() {
             className="w-full bg-muted/30 border border-border rounded-lg p-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
           />
         )}
-
         {currentStep.optional && (
           <p className="text-xs text-muted-foreground mt-2">Optional — skip if not applicable</p>
         )}
       </div>
-
       {/* Navigation */}
       <div className="flex items-center gap-3">
         {step > 0 && (

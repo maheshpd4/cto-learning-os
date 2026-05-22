@@ -1,18 +1,14 @@
-export const dynamic = "force-dynamic";
-
 "use client";
-
+export const dynamic = "force-dynamic";
 import { useState, useEffect, useRef } from "react";
 import { Send, Loader2, Bot, User, Sparkles, RefreshCw, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 interface Message {
   id: string;
   role: "USER" | "ASSISTANT";
   content: string;
   createdAt: string;
 }
-
 const QUICK_PROMPTS = [
   "Explain Kafka exactly-once semantics at CTO level",
   "Give me a system design interview question",
@@ -21,7 +17,6 @@ const QUICK_PROMPTS = [
   "Challenge me on distributed systems trade-offs",
   "Help me prepare a CTO interview answer",
 ];
-
 function renderMarkdown(text: string) {
   return text
     .replace(/^### (.*$)/gm, '<h3 class="text-sm font-bold text-foreground mt-3 mb-1">$1</h3>')
@@ -35,7 +30,6 @@ function renderMarkdown(text: string) {
     .replace(/\n\n/g, '</p><p class="mb-2 text-sm leading-relaxed">')
     .replace(/\n/g, '<br/>');
 }
-
 export default function CoachPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -44,7 +38,6 @@ export default function CoachPage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
   // Load session on mount
   useEffect(() => {
     fetch("/api/coach?action=session")
@@ -56,27 +49,22 @@ export default function CoachPage() {
       })
       .catch(() => setInitialLoading(false));
   }, []);
-
   // Auto-scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
   const sendMessage = async (text?: string) => {
     const msg = (text || input).trim();
     if (!msg || loading) return;
-
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "USER",
       content: msg,
       createdAt: new Date().toISOString(),
     };
-
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
-
     try {
       const res = await fetch("/api/coach", {
         method: "POST",
@@ -84,14 +72,12 @@ export default function CoachPage() {
         body: JSON.stringify({ message: msg, sessionId }),
       });
       const data = await res.json();
-
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "ASSISTANT",
         content: data.reply || "Sorry, something went wrong. Please try again.",
         createdAt: new Date().toISOString(),
       };
-
       setMessages((prev) => [...prev, aiMsg]);
       if (data.sessionId) setSessionId(data.sessionId);
     } catch (e) {
@@ -106,14 +92,12 @@ export default function CoachPage() {
       inputRef.current?.focus();
     }
   };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
-
   const newSession = async () => {
     setMessages([]);
     setSessionId(null);
@@ -122,7 +106,6 @@ export default function CoachPage() {
     setSessionId(d.sessionId);
     setMessages(d.messages || []);
   };
-
   if (initialLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -130,7 +113,6 @@ export default function CoachPage() {
       </div>
     );
   }
-
   return (
     <div className="flex flex-col h-[calc(100vh-96px)] max-w-3xl mx-auto animate-fade-in">
       {/* Header */}
@@ -152,7 +134,6 @@ export default function CoachPage() {
           New Session
         </button>
       </div>
-
       {/* Quick prompts (show only when no user messages) */}
       {messages.filter((m) => m.role === "USER").length === 0 && (
         <div className="mb-4">
@@ -170,7 +151,6 @@ export default function CoachPage() {
           </div>
         </div>
       )}
-
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 scroll-smooth">
         {messages.map((msg) => (
@@ -208,7 +188,6 @@ export default function CoachPage() {
             </div>
           </div>
         ))}
-
         {loading && (
           <div className="flex gap-3">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-violet-600">
@@ -225,7 +204,6 @@ export default function CoachPage() {
         )}
         <div ref={bottomRef} />
       </div>
-
       {/* Input */}
       <div className="mt-4 flex gap-3 items-end">
         <div className="flex-1 relative">

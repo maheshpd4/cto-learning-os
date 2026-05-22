@@ -1,12 +1,9 @@
-export const dynamic = "force-dynamic";
-
 "use client";
-
+export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { ExternalLink, Plus, ChevronDown, ChevronRight, Github,
          Loader2, Sparkles, CheckCircle2, Circle, Target } from "lucide-react";
 import { cn, SKILL_LABELS, SKILL_COLORS } from "@/lib/utils";
-
 interface ProjectTask {
   id: string;
   title: string;
@@ -15,7 +12,6 @@ interface ProjectTask {
   status: string;
   priority: string;
 }
-
 interface Project {
   id: string;
   title: string;
@@ -29,47 +25,39 @@ interface Project {
   skillAreas: string[];
   tasks: ProjectTask[];
 }
-
 const PRIORITY_COLORS: Record<string, string> = {
   LOW: "text-muted-foreground",
   MEDIUM: "text-cyan-400",
   HIGH: "text-amber-400",
   CRITICAL: "text-red-400",
 };
-
 const STATUS_COLORS: Record<string, string> = {
   PLANNING: "badge-upcoming",
   IN_PROGRESS: "badge-active",
   REVIEW: "bg-amber-500/10 text-amber-400 border border-amber-500/30",
   COMPLETED: "badge-completed",
 };
-
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [generatingResume, setGeneratingResume] = useState<string | null>(null);
-
   useEffect(() => {
     fetch("/api/projects")
       .then((r) => r.json())
       .then((d) => { setProjects(d.projects || []); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
-
   const toggleTask = async (projectId: string, taskId: string) => {
     const project = projects.find((p) => p.id === projectId);
     const task = project?.tasks.find((t) => t.id === taskId);
     if (!task) return;
-
     const newStatus = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
-
     await fetch(`/api/projects/${projectId}/tasks/${taskId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
     });
-
     setProjects((prev) =>
       prev.map((p) =>
         p.id !== projectId ? p : {
@@ -82,7 +70,6 @@ export default function ProjectsPage() {
       )
     );
   };
-
   const generateResumeBullet = async (project: Project) => {
     setGeneratingResume(project.id);
     try {
@@ -97,7 +84,6 @@ export default function ProjectsPage() {
       setGeneratingResume(null);
     }
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -105,11 +91,9 @@ export default function ProjectsPage() {
       </div>
     );
   }
-
   const totalCompleted = projects.filter((p) => p.status === "COMPLETED").length;
   const inProgress = projects.filter((p) => p.status === "IN_PROGRESS").length;
   const demoReady = projects.filter((p) => p.demoReady).length;
-
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -117,7 +101,6 @@ export default function ProjectsPage() {
         <h1 className="text-2xl font-bold text-foreground">Project Portfolio</h1>
         <p className="text-muted-foreground text-sm mt-1">5 flagship projects for your CTO portfolio</p>
       </div>
-
       {/* Stats strip */}
       <div className="grid grid-cols-3 gap-4">
         {[
@@ -131,13 +114,11 @@ export default function ProjectsPage() {
           </div>
         ))}
       </div>
-
       {/* Projects */}
       <div className="space-y-4">
         {projects.map((project, pi) => {
           const isExpanded = expanded === project.id;
           const completedTasks = project.tasks.filter((t) => t.status === "COMPLETED").length;
-
           return (
             <div key={project.id} className="card-cto">
               {/* Project header */}
@@ -161,7 +142,6 @@ export default function ProjectsPage() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{project.description}</p>
-
                   {/* Progress bar */}
                   <div className="flex items-center gap-3 mt-2">
                     <div className="flex-1 h-1.5 bg-muted/40 rounded-full overflow-hidden max-w-40">
@@ -176,13 +156,11 @@ export default function ProjectsPage() {
                   : <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
                 }
               </button>
-
               {/* Expanded detail */}
               {isExpanded && (
                 <div className="mt-4 pt-4 border-t border-border space-y-4">
                   {/* Description */}
                   <p className="text-sm text-foreground/80">{project.description}</p>
-
                   {/* Skill areas */}
                   <div className="flex flex-wrap gap-1.5">
                     {project.skillAreas.map((area) => (
@@ -192,7 +170,6 @@ export default function ProjectsPage() {
                       </span>
                     ))}
                   </div>
-
                   {/* GitHub link */}
                   {project.githubUrl && (
                     <a href={project.githubUrl} target="_blank" rel="noopener noreferrer"
@@ -202,7 +179,6 @@ export default function ProjectsPage() {
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
-
                   {/* Tasks backlog */}
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
@@ -236,7 +212,6 @@ export default function ProjectsPage() {
                       ))}
                     </div>
                   </div>
-
                   {/* Architecture notes */}
                   {project.architectureNotes && (
                     <div className="p-3 rounded-lg bg-muted/20 border border-border">
@@ -244,7 +219,6 @@ export default function ProjectsPage() {
                       <p className="text-xs text-foreground/80">{project.architectureNotes}</p>
                     </div>
                   )}
-
                   {/* Resume bullet */}
                   <div>
                     {project.resumeBullet ? (

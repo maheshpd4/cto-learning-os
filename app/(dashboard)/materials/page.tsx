@@ -1,12 +1,9 @@
-export const dynamic = "force-dynamic";
-
 "use client";
-
+export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { Plus, Search, ExternalLink, BookOpen, Youtube, FileText, Github,
          Loader2, Filter, StickyNote, Mic } from "lucide-react";
 import { cn, SKILL_LABELS, SKILL_COLORS } from "@/lib/utils";
-
 interface Material {
   id: string;
   title: string;
@@ -19,7 +16,6 @@ interface Material {
   status: string;
   tags: string[];
 }
-
 const TYPE_ICONS: Record<string, React.ElementType> = {
   COURSE: BookOpen,
   YOUTUBE: Youtube,
@@ -30,7 +26,6 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   ARCHITECTURE_DIAGRAM: FileText,
   INTERVIEW_QUESTION: Mic,
 };
-
 const TYPE_LABELS: Record<string, string> = {
   COURSE: "Course",
   YOUTUBE: "YouTube",
@@ -41,21 +36,18 @@ const TYPE_LABELS: Record<string, string> = {
   ARCHITECTURE_DIAGRAM: "Diagram",
   INTERVIEW_QUESTION: "Interview Q",
 };
-
 const STATUS_COLORS: Record<string, string> = {
   NOT_STARTED: "badge-pending",
   IN_PROGRESS: "badge-active",
   COMPLETED: "badge-completed",
   BOOKMARKED: "badge-upcoming",
 };
-
 const DIFFICULTY_COLORS: Record<string, string> = {
   BEGINNER: "text-emerald-400",
   INTERMEDIATE: "text-cyan-400",
   ADVANCED: "text-amber-400",
   ARCHITECT: "text-violet-400",
 };
-
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,14 +60,12 @@ export default function MaterialsPage() {
     skillArea: "AI_SYSTEMS", phase: "", difficulty: "INTERMEDIATE",
     status: "NOT_STARTED", tags: "",
   });
-
   useEffect(() => {
     fetch("/api/materials")
       .then((r) => r.json())
       .then((d) => { setMaterials(d.materials || []); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
-
   const addMaterial = async () => {
     const res = await fetch("/api/materials", {
       method: "POST",
@@ -93,7 +83,6 @@ export default function MaterialsPage() {
       setAddForm({ title: "", url: "", type: "COURSE", notes: "", skillArea: "AI_SYSTEMS", phase: "", difficulty: "INTERMEDIATE", status: "NOT_STARTED", tags: "" });
     }
   };
-
   const updateStatus = async (id: string, status: string) => {
     await fetch(`/api/materials/${id}`, {
       method: "PUT",
@@ -102,14 +91,12 @@ export default function MaterialsPage() {
     });
     setMaterials((prev) => prev.map((m) => m.id === id ? { ...m, status } : m));
   };
-
   const filtered = materials.filter((m) => {
     const matchSearch = !search || m.title.toLowerCase().includes(search.toLowerCase()) || m.notes?.toLowerCase().includes(search.toLowerCase());
     const matchSkill = filterSkill === "ALL" || m.skillArea === filterSkill;
     const matchStatus = filterStatus === "ALL" || m.status === filterStatus;
     return matchSearch && matchSkill && matchStatus;
   });
-
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -126,7 +113,6 @@ export default function MaterialsPage() {
           Add Resource
         </button>
       </div>
-
       {/* Add form */}
       {showAddForm && (
         <div className="card-cto border-primary/20 space-y-4 animate-slide-up">
@@ -164,7 +150,6 @@ export default function MaterialsPage() {
           </div>
         </div>
       )}
-
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">
@@ -190,7 +175,6 @@ export default function MaterialsPage() {
           <option value="BOOKMARKED">Bookmarked</option>
         </select>
       </div>
-
       {/* Materials grid */}
       {loading ? (
         <div className="flex items-center justify-center h-40">
@@ -207,7 +191,6 @@ export default function MaterialsPage() {
           {filtered.map((m) => {
             const Icon = TYPE_ICONS[m.type] || BookOpen;
             const skillColor = SKILL_COLORS[m.skillArea] || "#6b7280";
-
             return (
               <div key={m.id} className="card-cto group">
                 <div className="flex items-start gap-3 mb-3">
@@ -227,7 +210,6 @@ export default function MaterialsPage() {
                     </a>
                   )}
                 </div>
-
                 {/* Skill tag */}
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-xs px-2 py-0.5 rounded-full border"
@@ -238,12 +220,10 @@ export default function MaterialsPage() {
                     <span className="text-xs text-muted-foreground">Phase {m.phase}</span>
                   )}
                 </div>
-
                 {/* Notes preview */}
                 {m.notes && (
                   <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{m.notes}</p>
                 )}
-
                 {/* Tags */}
                 {m.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
@@ -252,7 +232,6 @@ export default function MaterialsPage() {
                     ))}
                   </div>
                 )}
-
                 {/* Status selector */}
                 <select
                   value={m.status}
