@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { prisma } from "@/lib/prisma";
 import { SKILL_LABELS, SKILL_COLORS, daysUntil, pctComplete } from "@/lib/utils";
 import { SkillArea } from "@prisma/client";
