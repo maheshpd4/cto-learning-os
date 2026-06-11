@@ -75,7 +75,7 @@ export default function CoachPage() {
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "ASSISTANT",
-        content: data.reply || "Sorry, something went wrong. Please try again.",
+        content: data.reply || `Sorry, something went wrong: ${data.error || "Unknown error"}`,
         createdAt: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, aiMsg]);
@@ -123,7 +123,7 @@ export default function CoachPage() {
           </div>
           <div>
             <h1 className="text-base font-bold text-foreground">AI Coach</h1>
-            <p className="text-xs text-muted-foreground">Powered by Gemini 1.5 Flash · CTO-level coaching</p>
+            <p className="text-xs text-muted-foreground">Powered by Gemini · CTO-level coaching</p>
           </div>
         </div>
         <button

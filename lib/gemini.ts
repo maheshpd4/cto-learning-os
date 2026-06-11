@@ -150,7 +150,8 @@ export async function coachReply(
     return response.text();
   } catch (error) {
     console.error("Coach reply error:", error);
-    throw new Error("Coach is unavailable right now. Please try again.");
+    const detail = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Coach is unavailable right now: ${detail}`);
   }
 }
 

@@ -82,11 +82,22 @@ export async function POST(request: NextRequest) {
       data: { sessionId: session.id, role: "USER", content: message },
     });
 
-    // Build conversation history for Gemini
-    const history = session.messages.map((msg) => ({
+    // Build conversation history for Gemini.
+    // Gemini's chat history must start with a "user" message — drop any
+    // leading assistant/welcome messages so the API doesn't reject it.
+    const firstUserIdx = session.messages.findIndex((msg) => msg.role === "USER");
+    const relevantMessages = firstUserIdx === -1 ? [] : session.messages.slice(firstUserIdx);
+
+    const history = relevantMessages.map((msg) => ({
       role: msg.role === "USER" ? "user" : "model" as "user" | "model",
       parts: [{ text: msg.content }],
     }));
+
+    // The most recently saved message is the user's current message (just
+    // saved above) — it shouldn't also be in the history passed to startChat.
+    if (history.length > 0 && history[history.length - 1].role === "user") {
+      history.pop();
+    }
 
     // Get AI reply
     const reply = await coachReply(message, history, SYSTEM_PROMPT_COACH);
@@ -99,8 +110,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ reply, sessionId: session.id, messageId: aiMessage.id });
   } catch (error) {
     console.error("Coach POST error:", error);
+    const detail = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Coach is unavailable. Check your GEMINI_API_KEY." },
+      { error: detail },
       { status: 500 }
     );
   }
