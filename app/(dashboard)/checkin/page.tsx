@@ -34,6 +34,8 @@ export default function CheckInPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const keys = ["studiedTopics", "builtThings", "unclearConcepts", "codeWritten", "blockers"] as const;
   const currentStep = STEPS[step];
   const isLastStep = step === STEPS.length - 1;
@@ -50,6 +52,8 @@ export default function CheckInPage() {
   };
   const handleSubmit = async () => {
     setLoading(true);
+    setSubmitError(null);
+    setAiError(null);
     try {
       const res = await fetch("/api/checkin", {
         method: "POST",
@@ -57,6 +61,11 @@ export default function CheckInPage() {
         body: JSON.stringify(answers),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setSubmitError(data.error || "Failed to save check-in. Please try again.");
+        return;
+      }
+      if (data.aiError) setAiError(data.aiError);
       if (data.aiSummary) {
         try {
           const parsed = JSON.parse(data.aiSummary);
@@ -73,10 +82,23 @@ export default function CheckInPage() {
             coachNote: "",
           });
         }
+      } else {
+        // No AI summary at all — still confirm the check-in was saved
+        setResult({
+          summary: "Your check-in was saved.",
+          corrections: "",
+          strengths: [],
+          weakAreas: data.weakAreasDetected || [],
+          nextDayPlan: [],
+          suggestedPractice: "",
+          interviewQuestions: [],
+          coachNote: "",
+        });
       }
       setSubmitted(true);
     } catch (e) {
       console.error(e);
+      setSubmitError("Network error — could not reach the server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -105,6 +127,14 @@ export default function CheckInPage() {
           <h1 className="text-xl font-bold text-foreground">Check-in Complete!</h1>
           <p className="text-muted-foreground text-sm mt-1">Here's your AI coach's analysis</p>
         </div>
+        {aiError && (
+          <div className="card-cto border-amber-500/30 bg-amber-500/5">
+            <p className="text-xs font-semibold text-amber-400 mb-1">⚠️ AI analysis unavailable</p>
+            <p className="text-xs text-foreground/70">
+              Your check-in was saved, but the AI coach couldn't run. ({aiError}). If this keeps happening, check that GEMINI_API_KEY (and GEMINI_MODEL) are set correctly in the deployment's environment variables.
+            </p>
+          </div>
+        )}
         {/* Summary */}
         <div className="card-cto border-primary/20">
           <div className="flex items-center gap-2 mb-3">
@@ -280,6 +310,12 @@ export default function CheckInPage() {
           <p className="text-xs text-muted-foreground mt-2">Optional — skip if not applicable</p>
         )}
       </div>
+      {/* Error message */}
+      {submitError && (
+        <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-sm text-red-400">
+          {submitError}
+        </div>
+      )}
       {/* Navigation */}
       <div className="flex items-center gap-3">
         {step > 0 && (

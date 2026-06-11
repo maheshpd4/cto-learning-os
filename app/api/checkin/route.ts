@@ -40,10 +40,23 @@ export async function POST(request: NextRequest) {
     }
 
     let aiResult: ReviewResult | null = null;
+    let aiError: string | null = null;
     try {
       aiResult = await generateJSON<ReviewResult>(prompt);
     } catch (e) {
+      aiError = e instanceof Error ? e.message : "Unknown AI error";
       console.warn("AI generation failed, saving without AI analysis:", e);
+      // Fallback so the UI always has something to render
+      aiResult = {
+        summary: "AI analysis is currently unavailable, but your check-in was saved.",
+        corrections: "",
+        strengths: [],
+        weakAreas: [],
+        nextDayPlan: [],
+        suggestedPractice: "",
+        interviewQuestions: [],
+        coachNote: `(AI error: ${aiError})`,
+      };
     }
 
     // 2. Map weak areas to skill areas for tracking
@@ -94,7 +107,7 @@ export async function POST(request: NextRequest) {
       create: { date: todayDate, completed: true },
     });
 
-    return NextResponse.json(checkIn);
+    return NextResponse.json({ ...checkIn, aiError });
   } catch (error) {
     console.error("Check-in error:", error);
     return NextResponse.json(

@@ -14,7 +14,7 @@ const genAI = process.env.GEMINI_API_KEY
   ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
   : null;
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
 const safetySettings = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
@@ -72,7 +72,7 @@ export async function generateJSON<T>(
   systemInstruction?: string
 ): Promise<T> {
   if (!genAI) {
-    return {} as T;
+    throw new Error("AI generation failed: GEMINI_API_KEY is not configured");
   }
 
   try {
